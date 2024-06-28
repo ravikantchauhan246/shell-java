@@ -1,10 +1,10 @@
 import java.nio.file.*;
 import java.util.*;
-import java.util.Scanner;
 public class Main {
   public static void main(String[] args) throws Exception {
-    Set<String> commands = Set.of("echo", "exit", "type");
+    Set<String> commands = Set.of("echo", "exit", "pwd", "type");
     Scanner scanner = new Scanner(System.in);
+    String cwd = Path.of("").toAbsolutePath().toString(); 
     while (true) {
       System.out.print("$ ");
       String input = scanner.nextLine();
@@ -16,7 +16,8 @@ public class Main {
         String arg = input.substring(5);
         if (commands.contains(arg)) {
           System.out.printf("%s is a shell builtin%n", arg);
-        } else {
+        }
+         else {
           String path = getPath(arg);
           if (path == null) {
             System.out.printf("%s: not found%n", arg);
@@ -24,7 +25,10 @@ public class Main {
             System.out.printf("%s is %s%n", arg, path);
           }
         }
-      } else {
+      } 
+      else if (input.equals("pwd")) {
+        System.out.println(cwd);}
+        else {
         
         String command = input.split(" ")[0];
         String path = getPath(command);
