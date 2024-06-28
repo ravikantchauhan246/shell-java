@@ -30,8 +30,11 @@ public class Main {
         System.out.println(cwd);}
         else if(input.startsWith("cd")){
           String dir = input.substring(3);
+          if (!dir.startsWith("/")) {
+            dir = cwd + "/" + dir;
+          }
         if (Files.isDirectory(Path.of(dir))) {
-          cwd = dir;
+          cwd = Path.of(dir).normalize().toString();
         } else {
           System.out.printf("cd: %s: No such file or directory%n", dir);
         }
