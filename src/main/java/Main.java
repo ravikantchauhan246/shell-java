@@ -2,7 +2,7 @@ import java.nio.file.*;
 import java.util.*;
 public class Main {
   public static void main(String[] args) throws Exception {
-    Set<String> commands = Set.of("echo", "exit", "pwd", "type");
+    Set<String> commands = Set.of("echo", "exit", "pwd", "type","cd");
     Scanner scanner = new Scanner(System.in);
     String cwd = Path.of("").toAbsolutePath().toString(); 
     while (true) {
@@ -28,6 +28,15 @@ public class Main {
       } 
       else if (input.equals("pwd")) {
         System.out.println(cwd);}
+        else if(input.startsWith(cd)){
+          String dir = input.substring(3);
+        if (Files.isDirectory(Path.of(dir))) {
+          cwd = dir;
+        } else {
+          System.out.printf("cd: %s: No such file or directory%n", dir);
+        }
+        }
+        
         else {
         
         String command = input.split(" ")[0];
