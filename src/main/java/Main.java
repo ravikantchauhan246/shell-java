@@ -14,6 +14,10 @@ public class Main {
             System.out.print("$ ");
 
             input = scanner.nextLine();
+
+            if(input.equals("exit 0")){
+                break;
+            }
         
         }while(!input.matches(""));
 
