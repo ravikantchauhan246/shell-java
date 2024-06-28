@@ -26,7 +26,7 @@ public class Main {
         System.out.println(input + ": command not found");
       }
 
-      scanner.close();
+      
     }
     
   }
