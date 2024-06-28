@@ -1,47 +1,73 @@
-import java.nio.file.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 public class Main {
+  private static File currentDirectory =
+      new File(System.getProperty("user.dir"));
   public static void main(String[] args) throws Exception {
-    Set<String> commands = Set.of("echo", "exit", "pwd", "type","cd");
-    Scanner scanner = new Scanner(System.in);
-    String cwd = Path.of("").toAbsolutePath().toString(); 
     while (true) {
       System.out.print("$ ");
+      Scanner scanner = new Scanner(System.in);
       String input = scanner.nextLine();
       if (input.equals("exit 0")) {
-        System.exit(0);
+        scanner.close();
+        break;
       } else if (input.startsWith("echo ")) {
         System.out.println(input.substring(5));
       } else if (input.startsWith("type ")) {
-        String arg = input.substring(5);
-        if (commands.contains(arg)) {
-          System.out.printf("%s is a shell builtin%n", arg);
-        }
-         else {
-          String path = getPath(arg);
-          if (path == null) {
-            System.out.printf("%s: not found%n", arg);
-          } else {
-            System.out.printf("%s is %s%n", arg, path);
+        List<String> builtInCommands =
+            Arrays.asList("echo", "type", "exit", "pwd", "cd");
+        if (builtInCommands.contains(input.substring(5))) {
+          System.out.println(input.substring(5) + " is a shell builtin");
+        } else if (System.getenv("PATH") != null) {
+          String pathEnv = System.getenv("PATH");
+          String[] paths = pathEnv.split(":");
+          boolean found = false;
+          for (String path : paths) {
+            File file = new File(path + "/" + input.substring(5));
+            if (file.exists() && file.canExecute()) {
+              System.out.println(input.substring(5) + " is " +
+                                 file.getAbsolutePath());
+              found = true;
+              break;
+            }
           }
-        }
-      } 
-      else if (input.equals("pwd")) {
-        System.out.println(cwd);}
-        else if(input.startsWith("cd")){
-          String dir = input.substring(3);
-          if (!dir.startsWith("/")) {
-            dir = cwd + "/" + dir;
+          if (!found) {
+            System.out.println(input.substring(5) + ": not found");
           }
-        if (Files.isDirectory(Path.of(dir))) {
-          cwd = Path.of(dir).normalize().toString();
         } else {
-          System.out.printf("cd: %s: No such file or directory%n", dir);
+          System.out.println(input.substring(5) + ": not found");
         }
+      } else if (input.equals("pwd")) {
+        System.out.println(currentDirectory.getAbsolutePath());
+      } else if (input.startsWith("cd")) {
+        String[] words = input.split(" ");
+        String path = words[1];
+        File newDirectory;
+        if (path.startsWith("/")) {
+          // Absolute path
+          newDirectory = new File(path);
+        } else if (path.equals("~")) {
+          
+          newDirectory = new File(System.getenv("HOME"));
+        } else {
+          // Relative path
+          newDirectory =
+              currentDirectory.toPath().resolve(path).normalize().toFile();
         }
-        
-        else {
-        
+        if (newDirectory.exists() && newDirectory.isDirectory()) {
+          currentDirectory = newDirectory;
+        } else {
+          System.out.println("cd: " + path + ": No such file or directory");
+        }
+      } else {
         String command = input.split(" ")[0];
         String path = getPath(command);
         if (path == null) {
@@ -54,11 +80,11 @@ public class Main {
       }
     }
   }
-  private static String getPath(String command) {
+  private static String getPath(String input) {
     for (String path : System.getenv("PATH").split(":")) {
-      Path fullPath = Path.of(path, command);
-      if (Files.isRegularFile(fullPath)) {
-        return fullPath.toString();
+      Path file = Path.of(path, input);
+      if (Files.isReadable(file)) {
+        return file.toString();
       }
     }
     return null;
