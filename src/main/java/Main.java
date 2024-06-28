@@ -1,26 +1,33 @@
+import java.util.*;
 import java.util.Scanner;
 public class Main {
   public static void main(String[] args) throws Exception {
-    // System.out.println("Logs from your program will appear here!");
+    // Uncomment this block to pass the first stage
     while (true) {
       System.out.print("$ ");
       Scanner scanner = new Scanner(System.in);
       String input = scanner.nextLine();
-      if (input.equals("exit 0")) {
-        break;
-      }
-    //   if (input.startsWith("echo")) {
-    //     System.out.println(input.substring(5));
-    //   } else {
-    //     System.out.println(input + ": command not found");
-    //   }
-      
-      if(input.startsWith("type")){
-        if(input.substring(5)=="echo" || input.substring(5)=="exit"){
-            System.out.println(input.substring(5)+ " is a shell builtin");
-        }else{
-            System.out.println(input+": not found");
+      String[] strings = input.split(" ");
+      if ("exit".equals(strings[0])) {
+        if ("0".equals(strings[1])) {
+          return;
+          
         }
+      } else if ("echo".equals(strings[0])) {
+        System.out.println(input.substring(5));
+      } else if ("type".equals(strings[0])) {
+        Set<String> st = Set.of("type", "exit", "echo");
+        if (st.contains(strings[1])) {
+          System.out.println(strings[1] + " is a shell builtin");
+        } else {
+          System.out.println(strings[1] + ": not found");
+        }
+      } else {
+        System.out.println(input + ": command not found");
       }
+
+      scanner.close();
+    }
+    
   }
-}}
+}
